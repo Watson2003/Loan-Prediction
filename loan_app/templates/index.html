@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Loan Approval Predictor</title>
+    <link rel="stylesheet" href="/static/style.css" />
+  </head>
+  <body>
+    <main class="page-shell">
+      <section class="form-panel">
+        <h1>Loan Approval Prediction</h1>
+        <p>Enter your loan details below and receive an approval prediction instantly.</p>
+
+        {% if error %}
+        <div class="alert alert-error">{{ error }}</div>
+        {% endif %}
+
+        {% if message %}
+        <div class="alert alert-success">{{ message }}{% if result.probability is not none %} (confidence: {{ result.probability | round(2) }}){% endif %}</div>
+        {% endif %}
+
+        <form action="/predict" method="post" class="loan-form">
+          <label>Gender</label>
+          <select name="Gender" required>
+            {% for option in options.Gender %}
+            <option value="{{ option }}">{{ option }}</option>
+            {% endfor %}
+          </select>
+
+          <label>Married</label>
+          <select name="Married" required>
+            {% for option in options.Married %}
+            <option value="{{ option }}">{{ option }}</option>
+            {% endfor %}
+          </select>
+
+          <label>Dependents</label>
+          <select name="Dependents" required>
+            {% for option in options.Dependents %}
+            <option value="{{ option }}">{{ option }}</option>
+            {% endfor %}
+          </select>
+
+          <label>Education</label>
+          <select name="Education" required>
+            {% for option in options.Education %}
+            <option value="{{ option }}">{{ option }}</option>
+            {% endfor %}
+          </select>
+
+          <label>Self Employed</label>
+          <select name="Self_Employed" required>
+            {% for option in options.Self_Employed %}
+            <option value="{{ option }}">{{ option }}</option>
+            {% endfor %}
+          </select>
+
+          <label>Property Area</label>
+          <select name="Property_Area" required>
+            {% for option in options.Property_Area %}
+            <option value="{{ option }}">{{ option }}</option>
+            {% endfor %}
+          </select>
+
+          <label>Credit History</label>
+          <select name="Credit_History" required>
+            {% for option in options.Credit_History %}
+            <option value="{{ option }}">{{ option }}</option>
+            {% endfor %}
+          </select>
+
+          <label>Applicant Income</label>
+          <input type="number" step="0.01" min="0" name="ApplicantIncome" required />
+
+          <label>Coapplicant Income</label>
+          <input type="number" step="0.01" min="0" name="CoapplicantIncome" required />
+
+          <label>Loan Amount</label>
+          <input type="number" step="0.01" min="0" name="LoanAmount" required />
+
+          <label>Loan Amount Term</label>
+          <input type="number" step="1" min="1" name="Loan_Amount_Term" required />
+
+          <button type="submit" class="button">Predict Loan Approval</button>
+        </form>
+      </section>
+    </main>
+  </body>
+</html>

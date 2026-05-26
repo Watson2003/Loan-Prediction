@@ -4,10 +4,9 @@ from pathlib import Path
 import joblib
 import pandas as pd
 
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 MODEL_PATH = BASE_DIR / "model" / "loan_model.pkl"
 
-# Feature order must match training exactly.
 EXPECTED_FEATURES = [
     "Gender",
     "Married",

@@ -3,6 +3,10 @@ from pathlib import Path
 
 import joblib
 import pandas as pd
+from starlette.applications import Starlette
+from starlette.requests import Request
+from starlette.responses import JSONResponse
+from starlette.routing import Route
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 MODEL_PATH = BASE_DIR / "model" / "loan_model.pkl"
@@ -31,34 +35,16 @@ def load_model():
     return MODEL
 
 
-def parse_body(request):
-    if hasattr(request, "json"):
-        data = request.json
-        if callable(data):
-            return data()
-        return data
-
-    if hasattr(request, "body"):
-        body = request.body
-        if callable(body):
-            body = body()
-        if isinstance(body, bytes):
-            body = body.decode("utf-8")
-        return json.loads(body)
-
-    raise ValueError("No JSON body found in request.")
-
-
 def build_input(payload):
     input_data = {key: payload.get(key) for key in EXPECTED_FEATURES}
     return pd.DataFrame([input_data], columns=EXPECTED_FEATURES)
 
 
-def handler(request):
+async def predict(request: Request) -> JSONResponse:
     try:
-        data = parse_body(request)
+        data = await request.json()
         if not isinstance(data, dict):
-            return {"error": "Request body must be a JSON object."}
+            return JSONResponse({"error": "Request body must be a JSON object."}, status_code=400)
 
         input_df = build_input(data)
         model = load_model()
@@ -69,13 +55,17 @@ def handler(request):
             probability = float(proba[1])
 
         decision = "Loan Approved" if int(raw_prediction[0]) == 1 else "Loan Not Approved"
-        return {
-            "decision": decision,
-            "probability": probability,
-        }
+        return JSONResponse(
+            {
+                "decision": decision,
+                "probability": probability,
+            }
+        )
     except Exception as exc:
-        return {"error": str(exc)}
+        return JSONResponse({"error": str(exc)}, status_code=500)
 
 
-application = handler
-app = handler
+app = Starlette(
+    debug=False,
+    routes=[Route("/", predict, methods=["POST"])],
+)

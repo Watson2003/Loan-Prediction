@@ -32,18 +32,17 @@ def load_model():
     return MODEL
 
 
-async def parse_body(request):
+def parse_body(request):
     if hasattr(request, "json"):
-        try:
-            return await request.json()
-        except TypeError:
-            data = request.json
-            if callable(data):
-                data = data()
-            return data
+        data = request.json
+        if callable(data):
+            return data()
+        return data
 
     if hasattr(request, "body"):
-        body = await request.body()
+        body = request.body
+        if callable(body):
+            body = body()
         if isinstance(body, bytes):
             body = body.decode("utf-8")
         return json.loads(body)
@@ -56,9 +55,9 @@ def build_input(payload):
     return pd.DataFrame([input_data], columns=EXPECTED_FEATURES)
 
 
-async def handler(request):
+def handler(request):
     try:
-        data = await parse_body(request)
+        data = parse_body(request)
         if not isinstance(data, dict):
             return {"error": "Request body must be a JSON object."}
 
@@ -77,3 +76,7 @@ async def handler(request):
         }
     except Exception as exc:
         return {"error": str(exc)}
+
+
+application = handler
+app = handler

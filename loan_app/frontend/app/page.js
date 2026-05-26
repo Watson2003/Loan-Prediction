@@ -44,7 +44,7 @@ export default function Home() {
     setMessage("");
 
     try {
-      const response = await fetch("http://localhost:8000/predict", {
+      const response = await fetch("/api/predict", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -53,15 +53,15 @@ export default function Home() {
       });
 
       const data = await response.json();
-      if (!response.ok) {
-        setError(data.detail || "Unable to predict. Check input fields.");
+      if (data.error) {
+        setError(data.error);
       } else {
         setMessage(
           `${data.decision}${data.probability ? ` (confidence ${Math.round(data.probability * 100)}%)` : ""}`
         );
       }
     } catch (exception) {
-      setError("Unable to connect to the backend. Start FastAPI on port 8000.");
+      setError("Unable to connect to the backend. Please try again later.");
     }
 
     setLoading(false);
